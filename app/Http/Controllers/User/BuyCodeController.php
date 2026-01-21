@@ -9,6 +9,13 @@ use Carbon\Carbon;
 
 class BuyCodeController extends Controller
 {
+    // NUEVO MÉTODO: Mostrar vista de compra
+    public function show($id)
+    {
+        $girl = User::findOrFail($id);
+        return view('user.buy-code', compact('girl'));
+    }
+
     public function buy($id)
     {
         $girl = User::findOrFail($id);
@@ -20,10 +27,10 @@ class BuyCodeController extends Controller
         $expiresAt = Carbon::now()->addHour();
 
         Code::create([
-            'user_id' => $girl->id,
-            'code' => $code,
-            'expires_at' => $expiresAt,
-        ]);
+    'code' => $code,
+    'expires_at' => $expiresAt,
+]);
+
 
         return back()->with('success', "Código generado: $code (válido 1 hora)");
     }

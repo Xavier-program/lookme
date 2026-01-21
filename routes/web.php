@@ -22,6 +22,17 @@ Route::get('/girls/{id}', [GirlController::class, 'show'])->name('user.girls.sho
 
 // Comprar código
 Route::post('/girls/{id}/buy', [BuyCodeController::class, 'buy'])->name('user.buy.code');
+// Mostrar formulario de compra
+Route::get('/girls/{id}/buy', [BuyCodeController::class, 'show'])->name('user.buy.code.show');
+
+
+
+
+
+
+
+
+
 
 // Ver contenido privado
 Route::get('/girls/{id}/private', [GirlController::class, 'private'])->name('user.girls.private');
