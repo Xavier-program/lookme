@@ -109,19 +109,13 @@
                                 {{ auth()->user()->description_private ?? 'No hay descripción privada aún' }}
                             </p>
 
-                            <h4 class="font-bold mb-2">Historial de códigos usados</h4>
-                            @if(isset($history) && $history->count() > 0)
-                                <div class="space-y-2">
-                                    @foreach($history as $item)
-                                        <div class="p-3 bg-white rounded-lg border">
-                                            <p><strong>Código:</strong> {{ $item->code->code }}</p>
-                                            <p><strong>Fecha:</strong> {{ $item->used_at }}</p>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                <p class="text-gray-500">No hay historial aún</p>
-                            @endif
+                            <!-- BOTÓN VER HISTORIAL -->
+    <a href="{{ route('chica.history.codes') }}"
+   class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold">
+   Ver historial de códigos
+</a>
+
+
                         </div>
 
                     </div>

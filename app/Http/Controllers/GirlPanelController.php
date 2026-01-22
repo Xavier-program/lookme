@@ -4,13 +4,24 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage; // <-- IMPORTANTE
+use App\Models\CodeUsage; // <-- AGREGAR ESTO
+use App\Models\Code;
+use Illuminate\Support\Facades\Auth;
 
 class GirlPanelController extends Controller
 {
     public function index()
     {
         $user = auth()->user();
-        return view('chica.panel', compact('user'));
+
+          $user = auth()->user();
+
+    // 🎯 Traer códigos usados por esta chica
+    $history = CodeUsage::where('girl_id', $user->id)
+        ->orderByDesc('used_at')
+        ->get();
+
+    return view('chica.panel', compact('user', 'history'));
     }
 
     // PERFIL PÚBLICO
@@ -96,26 +107,21 @@ class GirlPanelController extends Controller
     }
 
     // ELIMINAR FOTO PRIVADA
-   public function deletePhotoPrivate($index)
-{
-    $user = auth()->user();
+    public function deletePhotoPrivate($index)
+    {
+        $user = auth()->user();
 
-    $field = "photo_private_{$index}";
+        $field = "photo_private_{$index}";
 
-    // 1. borrar archivo si existe
-    if ($user->{$field}) {
-        Storage::delete($user->{$field});
+        if ($user->{$field}) {
+            Storage::delete($user->{$field});
+        }
+
+        $user->{$field} = null;
+        $user->save();
+
+        return redirect()->route('chica.edit.private');
     }
-
-    // 2. poner campo NULL
-    $user->{$field} = null;
-
-    // 3. guardar
-    $user->save();
-
-    // 4. redirigir a la vista privada (o al panel)
-    return redirect()->route('chica.edit.private');
-}
 
     // ELIMINAR VIDEO PRIVADO
     public function deleteVideoPrivate()
@@ -130,4 +136,20 @@ class GirlPanelController extends Controller
 
         return back()->with('success', 'Video privado eliminado');
     }
+
+
+
+
+public function history()
+{
+    $girl = Auth::user(); // la chica logueada
+
+    $history = Code::where('girl_id', $girl->id)
+        ->whereNotNull('used_at')
+        ->orderBy('used_at', 'desc')
+        ->get();
+
+    return view('chica.history-codes', compact('history'));
+}
+
 }

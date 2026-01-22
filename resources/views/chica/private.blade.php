@@ -9,6 +9,12 @@
     <div class="py-10">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
 
+
+
+
+<p>ID chica: {{ $girl->id }}</p>
+
+
             <!-- FORMULARIO PRINCIPAL (GUARDAR) -->
             <form method="POST" action="{{ route('chica.update.private') }}" enctype="multipart/form-data">
                 @csrf
@@ -96,5 +102,16 @@
         form.submit();
     }
 </script>
+
+@if ($errors->any())
+    <div class="bg-red-100 text-red-700 p-4 rounded mb-4">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 
 @endsection

@@ -30,6 +30,23 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
+
+
+<div class="mt-4">
+    <label class="flex items-start gap-3">
+        <input type="checkbox" name="terms" class="mt-1">
+        <span class="text-sm">
+            Acepto los <a href="{{ route('terms') }}" class="underline">Términos y Condiciones</a> y la <a href="{{ route('privacy') }}" class="underline">Política de Privacidad</a>.
+        </span>
+    </label>
+    <x-input-error :messages="$errors->get('terms')" class="mt-2" />
+</div>
+
+
+
+
+
+
         <div class="flex items-center justify-end mt-4">
             <a href="{{ route('login') }}" class="underline text-sm">
                 ¿Ya tienes cuenta?

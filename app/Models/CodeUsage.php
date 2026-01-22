@@ -10,16 +10,19 @@ class CodeUsage extends Model
 
     protected $fillable = [
         'code_id',
-        'user_id',
+        'girl_id',
         'ip',
         'user_agent',
         'used_at'
     ];
 
-    public $timestamps = false;
-
-    public function user()
+    public function girl()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'girl_id');
+    }
+
+    public function code()
+    {
+        return $this->belongsTo(Code::class, 'code_id');
     }
 }

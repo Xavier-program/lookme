@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use App\Models\TermsAcceptance;
+
 
 class RegisteredUserController extends Controller
 {
@@ -34,6 +36,8 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'terms' => ['required', 'accepted'],
+
         ]);
 
         // Subir foto pública
@@ -55,6 +59,17 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+
+        TermsAcceptance::create([
+    'user_id' => $user->id,
+    'role' => $user->role,
+    'accepted_at' => now(),
+    'ip_address' => $request->ip(),
+    'user_agent' => $request->userAgent(),
+    'terms_version' => 'v1.0',
+    'accepted_from' => url()->current(),
+]);
+
 
         // Redirigir al panel de chica
         return redirect()->route('girl.dashboard');

@@ -1,7 +1,9 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicGirlController;
 use App\Http\Controllers\GirlPanelController;
 use App\Http\Controllers\AdminGirlController;
@@ -9,82 +11,76 @@ use App\Http\Controllers\User\GirlController;
 use App\Http\Controllers\User\WelcomeController;
 use App\Http\Controllers\User\BuyCodeController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminCodeController;
 
-
-
-
-// RUTA PRINCIPAL (WELCOME)
+/*
+|--------------------------------------------------------------------------
+| RUTA PRINCIPAL
+|--------------------------------------------------------------------------
+*/
 Route::get('/', [WelcomeController::class, 'index'])->name('user.welcome');
 
-// GIRLS PUBLIC
+/*
+|--------------------------------------------------------------------------
+| GIRLS – PÚBLICO
+|--------------------------------------------------------------------------
+*/
 Route::get('/girls', [GirlController::class, 'index'])->name('user.girls.index');
 Route::get('/girls/{id}', [GirlController::class, 'show'])->name('user.girls.show');
 
-// Comprar código
-Route::post('/girls/{id}/buy', [BuyCodeController::class, 'buy'])->name('user.buy.code');
-// Mostrar formulario de compra
-Route::get('/girls/{id}/buy', [BuyCodeController::class, 'show'])->name('user.buy.code.show');
+/*
+|--------------------------------------------------------------------------
+| COMPRA DE CÓDIGOS
+|--------------------------------------------------------------------------
+*/
+Route::get('/girls/{id}/buy', [BuyCodeController::class, 'show'])
+    ->name('user.buy.code.show');
 
+Route::post('/girls/{id}/buy', [BuyCodeController::class, 'buy'])
+    ->name('user.buy.code');
 
+/*
+|--------------------------------------------------------------------------
+| CONTENIDO PRIVADO (USUARIO)
+|--------------------------------------------------------------------------
+*/
+Route::get('/girls/{id}/private', [GirlController::class, 'private'])
+    ->name('user.girls.private');
 
+Route::post('/girls/{id}/private', [GirlController::class, 'checkCode'])
+    ->name('user.girls.private');
 
-
-
-
-
-
-
-// Ver contenido privado
-Route::get('/girls/{id}/private', [GirlController::class, 'private'])->name('user.girls.private');
-Route::post('/girls/{id}/private', [GirlController::class, 'checkCode'])->name('user.girls.private');
-
-// Contenido privado
 Route::get('/girls/{id}/private-content', [GirlController::class, 'privateContent'])
     ->middleware('girl.access')
     ->name('user.girls.privateContent');
 
+Route::post('/girls/{id}/check-code', [GirlController::class, 'checkCodeAjax']);
 
+Route::get('/girls/{id}/full', [GirlController::class, 'fullProfile'])
+    ->name('user.girls.full');
 
-// -------------------------
-// RUTAS DE ADMIN
-// -------------------------
-
+/*
+|--------------------------------------------------------------------------
+| ADMIN
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'admin_only'])->group(function () {
 
     Route::get('/admin/panel', [AdminGirlController::class, 'index'])
         ->name('admin.dashboard');
 
-    Route::get('/admin/chicas', function () {
-        return view('admin.girls');
-    })->name('admin.girls');
-
-    Route::get('/admin/estadisticas', function () {
-        return view('admin.stats');
-    })->name('admin.stats');
-
-    Route::get('/admin/notificaciones', function () {
-        return view('admin.notifications');
-    })->name('admin.notifications');
-
-    // listado de chicas
     Route::get('/panel', [AdminGirlController::class, 'index'])
         ->name('panel');
 
-   // listado de chicas (ADMIN)
-Route::get('/admin/girls', [AdminGirlController::class, 'index'])
-    ->name('admin.girls.index');
+    Route::get('/admin/girls', [AdminGirlController::class, 'index'])
+        ->name('admin.girls.index');
 
-Route::get('/admin/girls/{user}', [AdminGirlController::class, 'show'])
-    ->name('admin.girls.show');
+    Route::get('/admin/girls/{user}', [AdminGirlController::class, 'show'])
+        ->name('admin.girls.show');
 
-
-    // eliminar chica
     Route::delete('/girls/{girl}', [AdminGirlController::class, 'destroy'])
         ->name('admin.girls.destroy');
 
-    // eliminar contenido
     Route::delete('/girls/{girl}/photo-public', [AdminGirlController::class, 'deletePhotoPublic'])
         ->name('admin.girls.delete.photo_public');
 
@@ -99,102 +95,95 @@ Route::get('/admin/girls/{user}', [AdminGirlController::class, 'show'])
 
     Route::delete('/girls/{girl}/description-private', [AdminGirlController::class, 'deleteDescriptionPrivate'])
         ->name('admin.girls.delete.description_private');
+
+    Route::post('/admin/generate-codes', [AdminGirlController::class, 'generateCodes'])
+        ->name('admin.generate.codes');
+
+    Route::post('/admin/codes/generate', [AdminCodeController::class, 'store'])
+        ->name('admin.codes.generate');
+
+    Route::get('/admin/codes', [AdminCodeController::class, 'index'])
+        ->name('admin.codes.index');
+
+    Route::get('/admin/codes/{batch}', [AdminCodeController::class, 'show'])
+        ->name('admin.codes.show');
 });
 
-
-// -------------------------
-// RUTAS DE CHICAS (panel)
-// -------------------------
-
+/*
+|--------------------------------------------------------------------------
+| PANEL DE CHICA (AUTH)
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/chica/panel', [GirlPanelController::class, 'index'])->name('girl.dashboard');
+    Route::get('/chica/panel', [GirlPanelController::class, 'index'])
+        ->name('girl.dashboard');
 
-    Route::get('/chica/editar', [GirlPanelController::class, 'editPublic'])->name('chica.edit.public');
-    Route::post('/chica/editar', [GirlPanelController::class, 'updatePublic'])->name('chica.update.public');
+    Route::get('/chica/editar', [GirlPanelController::class, 'editPublic'])
+        ->name('chica.edit.public');
 
-    Route::get('/chica/privado', [GirlPanelController::class, 'editPrivate'])->name('chica.edit.private');
-    Route::post('/chica/privado', [GirlPanelController::class, 'updatePrivate'])->name('chica.update.private');
+    Route::post('/chica/editar', [GirlPanelController::class, 'updatePublic'])
+        ->name('chica.update.public');
 
-    // ELIMINAR FOTO PÚBLICA
+    Route::get('/chica/privado', [GirlPanelController::class, 'editPrivate'])
+        ->name('chica.edit.private');
+
+    Route::post('/chica/privado', [GirlPanelController::class, 'updatePrivate'])
+        ->name('chica.update.private');
+
     Route::delete('/chica/editar/foto-publica', [GirlPanelController::class, 'deletePhotoPublic'])
         ->name('chica.delete.photo_public');
 
-    // ELIMINAR FOTO PRIVADA
     Route::delete('/chica/privado/foto/{index}', [GirlPanelController::class, 'deletePhotoPrivate'])
         ->name('chica.delete.photo_private');
 
-    // ELIMINAR VIDEO PRIVADO
     Route::delete('/chica/privado/video', [GirlPanelController::class, 'deleteVideoPrivate'])
         ->name('chica.delete.video_private');
+
+    Route::get('/chica/historial-codigos', [GirlPanelController::class, 'history'])
+        ->name('chica.history.codes');
 });
 
+/*
+|--------------------------------------------------------------------------
+| PERFIL PÚBLICO CHICA (SIEMPRE AL FINAL)
+|--------------------------------------------------------------------------
+*/
+Route::get('/chica/{id}', [PublicGirlController::class, 'show'])
+    ->name('chica.show');
 
-// -------------------------
-// RUTA PUBLIC GIRL SHOW
-// -------------------------
-Route::get('/chica/{id}', [PublicGirlController::class, 'show'])->name('public.girl.show');
+Route::get('/girls/{id}/full', [PublicGirlController::class, 'showFull'])
+    ->name('girls.full');
 
+/*
+|--------------------------------------------------------------------------
+| PERFIL / DASHBOARD / AUTH
+|--------------------------------------------------------------------------
+*/
+Route::get('/profile', [ProfileController::class, 'edit'])
+    ->name('profile.edit');
 
-
-
-
-
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-
-
-
-    Route::get('/dashboard', function () {
+Route::get('/dashboard', function () {
     return view('dashboard');
 })->name('dashboard');
 
-
-
-// Login para chicas/admin
 Route::get('/login', function () {
     return view('auth.inicio_sesion');
 })->name('login');
 
-
-
-
 Route::get('/force-login', function () {
     Auth::logout();
-
     request()->session()->invalidate();
     request()->session()->regenerateToken();
-
     return redirect()->route('login');
 })->name('force.login');
 
-
-
-
-
-
-Route::get('/girls/{id}/full', [App\Http\Controllers\User\GirlController::class, 'fullProfile'])
-    ->name('user.girls.full');
-
-
-
-Route::post('/girls/{id}/check-code', [GirlController::class, 'checkCodeAjax']);
-
-Route::post('/admin/generate-codes', [App\Http\Controllers\AdminGirlController::class, 'generateCodes'])
-    ->name('admin.generate.codes');
-
-
-
-
-    Route::post('/admin/codes/generate', [AdminCodeController::class, 'store'])->name('admin.codes.generate');
-Route::get('/admin/codes/{batch}', [AdminCodeController::class, 'show'])->name('admin.codes.show');
-
-
-Route::get('/admin/codes', [AdminCodeController::class, 'index'])->name('admin.codes.index');
-
-
-Route::get('/chica/{id}', [PublicGirlController::class, 'show'])->name('chica.show');
-
-Route::get('/girls/{id}/full', [PublicGirlController::class, 'showFull'])->name('girls.full');
-
+/*
+|--------------------------------------------------------------------------
+| LEGALES
+|--------------------------------------------------------------------------
+*/
+Route::view('/terms', 'legal.terms')->name('terms');
+Route::view('/privacy', 'legal.privacy')->name('privacy');
 
 require __DIR__.'/auth.php';
