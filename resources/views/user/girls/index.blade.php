@@ -21,13 +21,30 @@
                     {{ $girl->name_artist ?? $girl->name }}
                 </h2>
 
+                @if(isset($accessTimes[$girl->id]))
+                    <div class="mt-2 bg-green-100 text-green-800 text-sm rounded-lg px-3 py-2 text-center"
+                         data-countdown="{{ $accessTimes[$girl->id] }}"
+                         id="countdown-{{ $girl->id }}">
+                        ⏳ Tiempo restante: <span class="time">--:--</span>
+                    </div>
+                @endif
+
                 <div class="mt-4 flex gap-2">
-                    <!-- BOTÓN QUE ABRE MODAL CÓDIGO -->
-                    <button onclick="openCodeModal({{ $girl->id }})"
-                        class="px-4 py-2 bg-blue-500 text-white rounded">
-                        Ver perfil completo
-                    </button>
-                </div>
+    @if(isset($hasAccess[$girl->id]) && $hasAccess[$girl->id])
+        <!-- SI YA TIENE ACCESO, NO PIDE CÓDIGO -->
+        <a href="{{ url('girls/'.$girl->id.'/full') }}"
+           class="px-4 py-2 bg-blue-500 text-white rounded">
+            Ver perfil completo
+        </a>
+    @else
+        <!-- SI NO TIENE ACCESO, PIDE CÓDIGO -->
+        <button onclick="openCodeModal({{ $girl->id }})"
+            class="px-4 py-2 bg-blue-500 text-white rounded">
+            Ver perfil completo
+        </button>
+    @endif
+</div>
+
             </div>
         @endforeach
     </div>
@@ -189,7 +206,6 @@ function closeLegalModal() {
 function checkCode() {
     const code = document.getElementById('codeInput').value;
 
-    // Aquí validamos el código usando AJAX
     fetch(`/girls/${selectedGirlId}/check-code`, {
         method: 'POST',
         headers: {
@@ -208,9 +224,45 @@ function checkCode() {
         }
     })
 }
+
 document.getElementById('legalContinueBtn').addEventListener('click', function() {
     window.location.href = "{{ url('girls') }}/" + selectedGirlId + "/full";
 });
+
+function startCountdowns() {
+    document.querySelectorAll('[data-countdown]').forEach(el => {
+        let endTime = Number(el.dataset.countdown);
+
+        // Si viene en segundos, convertir a milisegundos
+        if (endTime < 10000000000) {
+            endTime = endTime * 1000;
+        }
+
+        function update() {
+            const now = Date.now();
+            const diff = endTime - now;
+
+            if (diff <= 0) {
+                el.remove();
+                return;
+            }
+
+            const minutes = Math.floor(diff / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+
+            el.querySelector('.time').textContent =
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        update();
+        setInterval(update, 1000);
+    });
+}
+
+startCountdowns();
+
+
+startCountdowns();
 
 </script>
 

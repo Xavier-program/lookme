@@ -28,7 +28,8 @@ class AdminCodeController extends Controller
             $code = strtoupper(Str::random(6)); // 6 caracteres
             $codes[] = [
                 'code' => $code,
-                'expires_at' => now()->addWeek(),
+                'expires_at' => null, // se define cuando se use
+
                 'batch_id' => $batch->id,
                 'created_at' => now(),
                 'updated_at' => now()

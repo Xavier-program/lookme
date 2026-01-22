@@ -39,11 +39,31 @@
 
                                 <!-- ESTADO -->
                                 <td class="border px-4 py-2">
-                                    @if($code->used_at)
-                                        <span class="text-red-600 font-bold">Usado</span>
-                                    @else
-                                        <span class="text-green-600 font-bold">Disponible</span>
-                                    @endif
+                                    @php
+                                        $estado = 'Disponible';
+                                        $color = 'text-green-600';
+
+                                        if ($code->used_at) {
+
+                                            // Si ya pasó la hora
+                                            if (now()->greaterThan($code->used_at->copy()->addHour())) {
+                                                $estado = 'Expirado';
+                                                $color = 'text-gray-600';
+                                            } else {
+                                                $estado = 'Usado';
+                                                $color = 'text-red-600';
+                                            }
+
+                                        }
+
+                                        // Si el código expiró por expires_at del sistema
+                                        if ($code->expires_at && $code->expires_at->isPast()) {
+                                            $estado = 'Expirado';
+                                            $color = 'text-gray-600';
+                                        }
+                                    @endphp
+
+                                    <span class="{{ $color }} font-bold">{{ $estado }}</span>
                                 </td>
 
                                 <!-- FECHA DE CREACIÓN -->
@@ -57,16 +77,17 @@
                                 </td>
 
                                 <!-- USADO EN -->
-                                @if($code->girl)
-                                    {{ $code->girl->name }}
-                                @else
-                                    —
-                                @endif
-
+                                <td class="border px-4 py-2">
+                                    @if($code->girl)
+                                        {{ $code->girl->name }} (ID: {{ $code->girl->id }})
+                                    @else
+                                        —
+                                    @endif
+                                </td>
 
                                 <!-- VENCIMIENTO -->
                                 <td class="border px-4 py-2">
-                                    {{ $code->expires_at ? $code->expires_at->format('d/m/Y H:i') : '-' }}
+                                    {{ $code->used_at ? $code->used_at->copy()->addHour()->format('d/m/Y H:i') : '-' }}
                                 </td>
 
                             </tr>

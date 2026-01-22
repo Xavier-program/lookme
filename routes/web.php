@@ -41,7 +41,9 @@ Route::get('/girls/{id}/private', [GirlController::class, 'private'])->name('use
 Route::post('/girls/{id}/private', [GirlController::class, 'checkCode'])->name('user.girls.private');
 
 // Contenido privado
-Route::get('/girls/{id}/private-content', [GirlController::class, 'privateContent'])->name('user.girls.privateContent');
+Route::get('/girls/{id}/private-content', [GirlController::class, 'privateContent'])
+    ->middleware('girl.access')
+    ->name('user.girls.privateContent');
 
 
 
@@ -135,8 +137,7 @@ Route::get('/chica/{id}', [PublicGirlController::class, 'show'])->name('public.g
 
 
 
-Route::get('/girls', [GirlController::class, 'index'])
-    ->name('user.girls.index');
+
 
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -176,7 +177,7 @@ Route::get('/girls/{id}/full', [App\Http\Controllers\User\GirlController::class,
 
 
 
-    Route::post('/girls/{id}/check-code', [GirlController::class, 'checkCodeAjax']);
+Route::post('/girls/{id}/check-code', [GirlController::class, 'checkCodeAjax']);
 
 Route::post('/admin/generate-codes', [App\Http\Controllers\AdminGirlController::class, 'generateCodes'])
     ->name('admin.generate.codes');

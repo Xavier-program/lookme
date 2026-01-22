@@ -61,6 +61,8 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'girl.access' => \App\Http\Middleware\CheckGirlAccess::class,
+
 
         // 🔥 Aquí agregamos tu middleware admin_only
         'admin_only' => \App\Http\Middleware\AdminOnly::class,
