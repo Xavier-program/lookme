@@ -4,6 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Code;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use App\Models\CodeBatch;
+
 
 class AdminGirlController extends Controller
 {
@@ -105,6 +110,37 @@ public function deleteDescriptionPrivate(User $girl)
     $girl->save();
 
     return back()->with('success', 'Descripción privada eliminada');
+}
+
+
+
+public function generateCodes(Request $request)
+{
+    $request->validate([
+        'amount' => 'required|integer|min:1'
+    ]);
+
+    $amount = $request->amount;
+
+    // Crear batch
+    $batch = CodeBatch::create([
+        'quantity' => $amount
+    ]);
+
+    // Generar códigos
+    for ($i = 0; $i < $amount; $i++) {
+        $code = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+
+        Code::create([
+            'code' => $code,
+            'expires_at' => Carbon::now()->addWeek(),
+
+            'batch_id' => $batch->id
+        ]);
+    }
+
+    // Redirigir a la tabla tipo excel
+    return redirect()->route('admin.codes.show', $batch->id);
 }
 
 

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 use App\Models\CodeUsage; // <-- IMPORTAR
+use App\Models\GirlPrivate; // <-- AGREGAR ESTE IMPORT
 
 class User extends Authenticatable
 {
@@ -37,7 +38,7 @@ class User extends Authenticatable
         return $this->hasMany(CodeUsage::class);
     }
 
-    // RELACIÓN A private (si ya la tienes)
+    // RELACIÓN A private
     public function private()
     {
         return $this->hasOne(GirlPrivate::class);

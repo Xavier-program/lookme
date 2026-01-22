@@ -1,4 +1,5 @@
-<x-app-layout>
+@extends('layouts.app')
+@section('content')
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             Editar Perfil Privado
@@ -96,4 +97,4 @@
     }
 </script>
 
-</x-app-layout>
+@endsection

@@ -18,5 +18,14 @@
             </video>
         @endif
     </div>
+
+    {{-- NUEVO: Mostrar contacto --}}
+    <div class="mt-6">
+        <h2 class="text-xl font-bold mb-2">Contacto</h2>
+        <p class="text-gray-700">
+            {{ $girl->contacto ?? 'No disponible' }}
+
+        </p>
+    </div>
 </div>
 @endsection

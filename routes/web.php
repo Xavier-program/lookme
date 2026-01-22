@@ -10,6 +10,8 @@ use App\Http\Controllers\User\WelcomeController;
 use App\Http\Controllers\User\BuyCodeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\AdminCodeController;
+
 
 
 
@@ -163,5 +165,35 @@ Route::get('/force-login', function () {
 
     return redirect()->route('login');
 })->name('force.login');
+
+
+
+
+
+
+Route::get('/girls/{id}/full', [App\Http\Controllers\User\GirlController::class, 'fullProfile'])
+    ->name('user.girls.full');
+
+
+
+    Route::post('/girls/{id}/check-code', [GirlController::class, 'checkCodeAjax']);
+
+Route::post('/admin/generate-codes', [App\Http\Controllers\AdminGirlController::class, 'generateCodes'])
+    ->name('admin.generate.codes');
+
+
+
+
+    Route::post('/admin/codes/generate', [AdminCodeController::class, 'store'])->name('admin.codes.generate');
+Route::get('/admin/codes/{batch}', [AdminCodeController::class, 'show'])->name('admin.codes.show');
+
+
+Route::get('/admin/codes', [AdminCodeController::class, 'index'])->name('admin.codes.index');
+
+
+Route::get('/chica/{id}', [PublicGirlController::class, 'show'])->name('chica.show');
+
+Route::get('/girls/{id}/full', [PublicGirlController::class, 'showFull'])->name('girls.full');
+
 
 require __DIR__.'/auth.php';

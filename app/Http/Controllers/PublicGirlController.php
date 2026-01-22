@@ -6,10 +6,11 @@ use App\Models\User;
 
 class PublicGirlController extends Controller
 {
-    public function show($id)
-    {
-        $girl = User::findOrFail($id);
+   public function showFull($id)
+{
+    $girl = User::findOrFail($id);
+    return view('chica.show', compact('girl'));
 
-        return view('public.girl', compact('girl'));
-    }
+}
+    
 }
