@@ -18,15 +18,20 @@
                         <label class="block font-bold mb-1">Nombre artístico / Ciudad</label>
 
 <p class="text-sm text-gray-600 mb-2">
-    Es muy importante que completes tu <strong>ciudad</strong> y tu <strong>nombre artístico</strong>, y que agregues una breve descripción que atraiga a los usuarios a tu perfil.
-    Esto ayuda a que te encuentren más fácil y a que se animen a contactarte.
+     <strong>Pasos importantes para completar tu perfil:</strong><br><br>
+
+    1. <strong>Ciudad donde te encuentras:</strong> Indica tu ciudad o zona de trabajo para que los usuarios puedan ubicarte fácilmente.<br>
+    2. <strong>Nombre artístico:</strong> Ingresa el nombre con el que deseas presentarte en la plataforma; este será visible para los usuarios.<br>
+    3. <strong>Breve descripción:</strong> Escribe una descripción clara y profesional que destaque tu estilo y atraiga a los usuarios a tu perfil.<br><br>
+
+    Completar correctamente esta información es fundamental para mejorar tu visibilidad, generar mayor confianza y facilitar el contacto con los usuarios.
 </p>
 
 
                         <textarea
                             name="name_artist"
                             rows="3"
-                            placeholder="Aquí escribe tu nombre artístico, la ciudad en la que estas y una breve descripción que atrape miradas 💋"
+                            placeholder="Ejemplo:  Chetumal · Soy Luna, una chica auténtica y encantadora.  Ven y conóceme, te garantizo una experiencia que no olvidarás."
                             class="w-full border rounded-lg p-3 resize-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                         >{{ $user->name_artist }}</textarea>
                     </div>

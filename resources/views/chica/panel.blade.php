@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="py-2 ">
+    <div class="py-4 ">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             <!-- TITULO -->
-            <div class="mb-3 text-center">
+            <div class="mb-3">
                 <h1 class="text-2xl font-bold text-white">
-                    Bienvenida{{ auth()->user()->name_artist ?? auth()->user()->name }}
+                    Bienvenid@
                 </h1>
                 <p class="text-gray-300 mt-1">
-                    Aquí puedes configurar tu perfil público, subir contenido privado y ver tu historial.
+                    Aquí puedes configurar tu perfil público, subir contenido privado y ver tu historial de codigos.
                 </p>
             </div>
 

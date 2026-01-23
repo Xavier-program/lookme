@@ -29,7 +29,24 @@
                         </tr>
                     </thead>
                     <tbody>
+
+                        @php
+                            $lastGirlId = null;
+                        @endphp
+
                         @foreach($codes as $code)
+
+                            @if($lastGirlId !== $code->girl_id)
+                                <tr class="bg-gray-200">
+                                    <td colspan="6" class="px-4 py-2 font-bold">
+                                        {{ $code->girl ? $code->girl->name : 'Sin chica asignada' }}
+                                    </td>
+                                </tr>
+                                @php
+                                    $lastGirlId = $code->girl_id;
+                                @endphp
+                            @endif
+
                             <tr class="{{ $loop->even ? 'bg-gray-50' : 'bg-white' }}">
 
                                 <!-- CÓDIGO -->

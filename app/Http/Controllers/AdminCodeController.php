@@ -47,13 +47,13 @@ class AdminCodeController extends Controller
         return view('admin.codes.show', compact('batch'));
     }
 
-
-
     public function index()
-{
-   $codes = Code::with('girl')->orderBy('created_at', 'desc')->paginate(50);
+    {
+        $codes = Code::with('girl')
+            ->orderBy('girl_id', 'asc')     // <-- AGRUPA POR CHICA
+            ->orderBy('created_at', 'desc')
+            ->paginate(50);
 
-    return view('admin.codes.index', compact('codes'));
-}
-
+        return view('admin.codes.index', compact('codes'));
+    }
 }
