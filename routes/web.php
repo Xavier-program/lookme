@@ -114,7 +114,8 @@ Route::middleware(['auth', 'admin_only'])->group(function () {
 | PANEL DE CHICA (AUTH)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
+
 
     Route::get('/chica/panel', [GirlPanelController::class, 'index'])
         ->name('girl.dashboard');

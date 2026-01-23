@@ -58,7 +58,7 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
+        
 
         TermsAcceptance::create([
     'user_id' => $user->id,
@@ -72,6 +72,7 @@ class RegisteredUserController extends Controller
 
 
         // Redirigir al panel de chica
-        return redirect()->route('girl.dashboard');
+        return redirect()->route('verification.notice');
+
     }
 }
