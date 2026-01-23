@@ -23,7 +23,7 @@ class GirlController extends Controller
 
 
 
-     dd('LLEGA A CHECKCODE');
+     
 
 
 
@@ -121,29 +121,45 @@ class GirlController extends Controller
         return view('user.girls.privateContent', compact('girl'));
     }
 
-    public function index()
-    {
-        $girls = User::where('role', 'girl')->get();
+        public function index()
+{
+    $girls = User::where('role', 'girl')->get();
 
-        // ⏳ Guardamos los tiempos de acceso por chica
-        $accessTimes = [];
+    $accessTimes = [];
+    $hasAccess = [];
 
-        foreach ($girls as $girl) {
+    foreach ($girls as $girl) {
 
-            // BUSCAMOS EL ÚLTIMO CÓDIGO ASIGNADO A ESA CHICA
-            $code = Code::where('girl_id', $girl->id)
-                ->whereNotNull('used_at')
-                ->orderByDesc('used_at')
-                ->first();
+        // 1) Revisar si hay acceso en sesión
+        $expiresAtSession = session()->get("access_girl_{$girl->id}");
 
-            // SI EXISTE Y NO HA EXPIRADO, GUARDAMOS EL TIEMPO
-            if ($code && $code->expires_at && now()->lt($code->expires_at)) {
-                $accessTimes[$girl->id] = $code->expires_at->timestamp;
-            }
+        if ($expiresAtSession && now()->lessThan($expiresAtSession)) {
+            $hasAccess[$girl->id] = true;
+            $accessTimes[$girl->id] = $expiresAtSession->timestamp;
+            continue;
         }
 
-        return view('user.girls.index', compact('girls', 'accessTimes'));
+        // 2) Si no hay sesión, revisar si hay un código activo en DB
+        $code = Code::where('girl_id', $girl->id)
+            ->whereNotNull('used_at')
+            ->where('expires_at', '>', now())
+            ->orderByDesc('used_at')
+            ->first();
+
+        if ($code) {
+            $hasAccess[$girl->id] = true;
+            $accessTimes[$girl->id] = $code->expires_at->timestamp;
+
+            // Guardar también en sesión para evitar volver a pedir
+            session()->put("access_girl_{$girl->id}", $code->expires_at);
+        } else {
+            $hasAccess[$girl->id] = false;
+        }
     }
+
+    return view('user.girls.index', compact('girls', 'accessTimes', 'hasAccess'));
+}
+
 
 
     public function fullProfile($id)

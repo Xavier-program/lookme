@@ -6,7 +6,7 @@
         </h2>
     </x-slot>
 
-    <div class="py-10">
+    <div class="py-4">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
 
             <form method="POST" action="{{ route('chica.update.public') }}" enctype="multipart/form-data">
@@ -14,13 +14,31 @@
 
                 <div class="bg-white shadow-sm rounded-lg p-6 space-y-4">
 
-                    <div>
-                        <label class="block font-bold">Nombre artístico</label>
-                        <input type="text" name="name_artist" value="{{ $user->name_artist }}" class="w-full border rounded-lg p-2">
+                   <div>
+                        <label class="block font-bold mb-1">Nombre artístico / Ciudad</label>
+
+<p class="text-sm text-gray-600 mb-2">
+    Es muy importante que completes tu <strong>ciudad</strong> y tu <strong>nombre artístico</strong>, y que agregues una breve descripción que atraiga a los usuarios a tu perfil.
+    Esto ayuda a que te encuentren más fácil y a que se animen a contactarte.
+</p>
+
+
+                        <textarea
+                            name="name_artist"
+                            rows="3"
+                            placeholder="Aquí escribe tu nombre artístico, la ciudad en la que estas y una breve descripción que atrape miradas 💋"
+                            class="w-full border rounded-lg p-3 resize-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                        >{{ $user->name_artist }}</textarea>
                     </div>
+
+
 
                     <div>
                         <label class="block font-bold">Foto pública</label>
+                        <p class="text-sm text-gray-600 mt-1">
+                        Tu foto pública es tu carta de presentación. Elige una imagen atractiva que despierte curiosidad y motive a los usuarios a entrar a tu perfil 💕
+                    </p>
+
                         <input type="file" name="photo_public" class="w-full">
                     </div>
 
@@ -40,10 +58,7 @@
 
 
 
-                    <div>
-                        <label class="block font-bold">Descripción pública</label>
-                        <textarea name="description_public" class="w-full border rounded-lg p-2" rows="4">{{ $user->description_public }}</textarea>
-                    </div>
+                    
 
                    <button class="w-full bg-indigo-600 text-white rounded-lg py-2 font-bold">
     Guardar cambios

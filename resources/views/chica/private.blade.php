@@ -12,7 +12,8 @@
 
 
 
-<p>ID chica: {{ $girl->id }}</p>
+
+
 
 
             <!-- FORMULARIO PRINCIPAL (GUARDAR) -->
@@ -23,7 +24,20 @@
 
                     <div>
                         <label class="block font-bold">Descripción privada</label>
-                        <textarea name="description_private" class="w-full border rounded-lg p-2" rows="4">{{ $user->description_private }}</textarea>
+                       <textarea name="description_private"
+          class="w-full border rounded-lg p-2 min-h-[220px]"
+          rows="6"
+          placeholder="Escribe aquí una descripción atractiva de ti y tu servicio. Incluye tu forma de contacto (WhatsApp, Telegram o Instagram). Ejemplo:
+
+Soy una chica complaciente, cariñosa y discreta. Me gusta disfrutar y hacer que tú también lo hagas. 
+
+📲 Contacto: WhatsApp / Telegram: +52 123 456 7890
+📍 Zona: (tu ciudad)
+⌚ Horarios: (tu disponibilidad)
+
+¡Escríbeme y nos organizamos!">{{ $user->description_private }}</textarea>
+
+
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
