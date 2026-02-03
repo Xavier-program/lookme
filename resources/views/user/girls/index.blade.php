@@ -179,29 +179,18 @@
 <script>
 let selectedGirlId = null;
 
-function openBuyModal() {
-    document.getElementById('buyModal').classList.remove('hidden');
-}
-function closeBuyModal() {
-    document.getElementById('buyModal').classList.add('hidden');
-}
+// --- MODALES ---
+function openBuyModal() { document.getElementById('buyModal').classList.remove('hidden'); }
+function closeBuyModal() { document.getElementById('buyModal').classList.add('hidden'); }
 
-function openCodeModal(id) {
-    selectedGirlId = id;
-    document.getElementById('codeModal').classList.remove('hidden');
+function openCodeModal(id) { 
+    selectedGirlId = id; 
+    document.getElementById('codeModal').classList.remove('hidden'); 
 }
+function closeCodeModal() { document.getElementById('codeModal').classList.add('hidden'); }
 
-function closeCodeModal() {
-    document.getElementById('codeModal').classList.add('hidden');
-}
-
-function openLegalModal() {
-    document.getElementById('legalModal').classList.remove('hidden');
-}
-
-function closeLegalModal() {
-    document.getElementById('legalModal').classList.add('hidden');
-}
+function openLegalModal() { document.getElementById('legalModal').classList.remove('hidden'); }
+function closeLegalModal() { document.getElementById('legalModal').classList.add('hidden'); }
 
 function checkCode() {
     const code = document.getElementById('codeInput').value;
@@ -229,20 +218,20 @@ document.getElementById('legalContinueBtn').addEventListener('click', function()
     window.location.href = "{{ url('girls') }}/" + selectedGirlId + "/full";
 });
 
+// --- CONTADORES ---
 function startCountdowns() {
     document.querySelectorAll('[data-countdown]').forEach(el => {
+        // Obtener timestamp en milisegundos
         let endTime = Number(el.dataset.countdown);
-
-        if (endTime < 10000000000) {
-            endTime = endTime * 1000;
-        }
+        if (endTime < 10000000000) endTime = endTime * 1000; // convertir segundos a ms si es necesario
 
         function update() {
             const now = Date.now();
-            const diff = endTime - now;
+            let diff = endTime - now;
 
             if (diff <= 0) {
-                el.remove();
+                // Tiempo expirado: recargar para bloquear el acceso
+                location.reload();
                 return;
             }
 
@@ -250,14 +239,16 @@ function startCountdowns() {
             const seconds = Math.floor((diff % 60000) / 1000);
 
             el.querySelector('.time').textContent =
-                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
         }
 
+        // Ejecutar al inicio y luego cada segundo
         update();
         setInterval(update, 1000);
     });
 }
 
+// Iniciar todos los contadores
 startCountdowns();
 </script>
 

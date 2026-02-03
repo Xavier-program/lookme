@@ -20,8 +20,8 @@
         </div>
 
         <!-- DESCRIPCION -->
-        <div class="border rounded-lg shadow p-4">
-            <h2 class="text-xl font-bold mb-2">Descripción</h2>
+        <div class="border rounded-lgshadow p-4">
+            <h2 class="text-xl font-bold mb-2">Descripció</h2>
             <p class="text-gray-700">
                 {{ $girl->description_public ?? 'Sin descripción aún' }}
             </p>

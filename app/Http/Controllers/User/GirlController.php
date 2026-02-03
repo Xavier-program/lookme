@@ -20,16 +20,6 @@ class GirlController extends Controller
     // 2) Validar código (checkCode)
     public function checkCode(Request $request, $id)
     {
-
-
-
-     
-
-
-
-
-
-
         $request->validate([
             'code' => 'required|string'
         ]);
@@ -42,7 +32,6 @@ class GirlController extends Controller
                           ->orWhere('girl_id', $girl->id);
                 })
                 ->first();
-
 
         // ❌ No existe
         if (!$code) {
@@ -65,7 +54,7 @@ class GirlController extends Controller
             }
 
             // ⛔ Si ya pasó la hora
-            if (now()->greaterThan($code->used_at->copy()->addHour())) {
+            if (now()->greaterThan($code->used_at->copy()->addMinutes(30))) {
                 return back()->with('error', 'El acceso con este código ya expiró.');
             }
 
@@ -73,18 +62,21 @@ class GirlController extends Controller
             /**
              * ✅ PRIMER USO DEL CÓDIGO
              */
+            $expiresAt = now()->addMinutes(30); // unificar expiración
             $code->update([
                 'girl_id'    => $girl->id,
                 'used_at'    => now(),
-                'expires_at' => now()->addHour(),
+                'expires_at' => $expiresAt,
                 'ip'         => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
 
             // 🔁 REFRESCAR EL MODELO PARA QUE SE ACTUALICE EN MEMORIA
             $code->refresh();
-        }
 
+            // 🕐 Guardar acceso en sesión con el mismo tiempo que la DB
+            session()->put("access_girl_{$girl->id}", $expiresAt);
+        }
 
         // 🔥 AQUI SE GUARDA EL HISTORIAL (SE AGREGO ESTA PARTE)
         CodeUsage::create([
@@ -95,78 +87,89 @@ class GirlController extends Controller
             'used_at'    => now(),
         ]);
 
-        // 🕐 Guardar acceso real por 1 hora
-        session()->put(
-            "access_girl_{$girl->id}",
-            $code->used_at->copy()->addHour()
-        );
-
         return redirect()->route('user.girls.privateContent', $girl->id);
     }
 
-
-
     // 3) Mostrar contenido privado (Paso 7)
     public function privateContent($id)
-    {
-        $girl = User::findOrFail($id);
-
-        $expiresAt = session()->get("access_girl_{$girl->id}");
-
-        if (!$expiresAt || now()->greaterThan($expiresAt)) {
-            return redirect()->route('user.girls.private', $girl->id)
-                ->with('error', 'Tu acceso expiró. Compra otro código.');
-        }
-
-        return view('user.girls.privateContent', compact('girl'));
-    }
-
-        public function index()
 {
-    $girls = User::where('role', 'girl')->get();
+    $girl = User::findOrFail($id);
 
-    $accessTimes = [];
-    $hasAccess = [];
+    // 1️⃣ Revisar acceso en sesión
+    $expiresAt = session()->get("access_girl_{$girl->id}");
 
-    foreach ($girls as $girl) {
+    // 2️⃣ Validar también contra la DB
+    $code = Code::where('girl_id', $girl->id)
+        ->whereNotNull('used_at')
+        ->where('expires_at', '>', now())
+        ->orderByDesc('expires_at')
+        ->first();
 
-        // 1) Revisar si hay acceso en sesión
-        $expiresAtSession = session()->get("access_girl_{$girl->id}");
+    if (!$expiresAt || !$code || now()->greaterThan($expiresAt) || now()->greaterThan($code->expires_at)) {
+        // Limpiar sesión si ya expiró
+        session()->forget("access_girl_{$girl->id}");
 
-        if ($expiresAtSession && now()->lessThan($expiresAtSession)) {
-            $hasAccess[$girl->id] = true;
-            $accessTimes[$girl->id] = $expiresAtSession->timestamp;
-            continue;
-        }
-
-        // 2) Si no hay sesión, revisar si hay un código activo en DB
-        $code = Code::where('girl_id', $girl->id)
-            ->whereNotNull('used_at')
-            ->where('expires_at', '>', now())
-            ->orderByDesc('used_at')
-            ->first();
-
-        if ($code) {
-            $hasAccess[$girl->id] = true;
-            $accessTimes[$girl->id] = $code->expires_at->timestamp;
-
-            // Guardar también en sesión para evitar volver a pedir
-            session()->put("access_girl_{$girl->id}", $code->expires_at);
-        } else {
-            $hasAccess[$girl->id] = false;
-        }
+        return redirect()->route('user.girls.private', $girl->id)
+            ->with('error', 'Tu acceso expiró. Compra otro código.');
     }
 
-    return view('user.girls.index', compact('girls', 'accessTimes', 'hasAccess'));
+    // Sincronizar sesión con expiración real de la DB
+    session()->put("access_girl_{$girl->id}", $code->expires_at);
+
+    return view('user.girls.privateContent', compact('girl'));
 }
 
 
+    public function index()
+    {
+        $girls = User::where('role', 'girl')->get();
+
+        $accessTimes = [];
+        $hasAccess = [];
+
+        foreach ($girls as $girl) {
+
+            // 1) Revisar si hay acceso en sesión
+            $expiresAtSession = session()->get("access_girl_{$girl->id}");
+
+            if ($expiresAtSession && now()->lessThan($expiresAtSession)) {
+                $hasAccess[$girl->id] = true;
+                $accessTimes[$girl->id] = $expiresAtSession->timestamp;
+                continue;
+            }
+
+            // 2) Si no hay sesión, revisar si hay un código activo en DB
+            $code = Code::where('girl_id', $girl->id)
+                ->whereNotNull('used_at')
+                ->where('expires_at', '>', now())
+                ->orderByDesc('expires_at') // <-- corregido: tomar expiración más reciente
+                ->first();
+
+            if ($code) {
+                $hasAccess[$girl->id] = true;
+                $accessTimes[$girl->id] = $code->expires_at->timestamp;
+
+                // Guardar también en sesión para evitar volver a pedir
+                session()->put("access_girl_{$girl->id}", $code->expires_at);
+            } else {
+                $hasAccess[$girl->id] = false;
+            }
+        }
+
+        return view('user.girls.index', compact('girls', 'accessTimes', 'hasAccess'));
+    }
 
     public function fullProfile($id)
-    {
-        $girl = User::findOrFail($id);
-        return view('user.girls.full', compact('girl'));
+{
+    // ❌ si NO tiene acceso, regresarlo al listado
+    if (!session()->has("access_girl_{$id}")) {
+        return redirect()->route('user.girls.index');
     }
+
+    $girl = User::findOrFail($id);
+
+    return view('user.girls.full', compact('girl'));
+}
 
     public function checkCodeAjax(Request $request, $id)
     {
@@ -205,7 +208,7 @@ class GirlController extends Controller
             ]);
         }
 
-        if ($code->used_at && now()->greaterThan($code->used_at->copy()->addHour())) {
+        if ($code->used_at && now()->greaterThan($code->used_at->copy()->addMinutes(30))) {
             return response()->json([
                 'success' => false,
                 'debug' => 'CÓDIGO YA EXPIRO LA HORA'
@@ -213,16 +216,21 @@ class GirlController extends Controller
         }
 
         if (!$code->used_at) {
+            $expiresAt = now()->addMinutes(30); // unificar expiración
             $code->update([
                 'girl_id'    => $girl->id,
                 'used_at'    => now(),
-                'expires_at' => now()->addHour(),
+                'expires_at' => $expiresAt,
                 'ip'         => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
-        }
 
-        session()->put("access_girl_{$girl->id}", now()->addHour());
+            // Guardar sesión con la misma expiración
+            session()->put("access_girl_{$girl->id}", $expiresAt);
+        } else {
+            // Si ya estaba usado pero es válido, asegurar que la sesión también tenga el mismo tiempo
+            session()->put("access_girl_{$girl->id}", $code->expires_at);
+        }
 
         return response()->json([
             'success' => true,
@@ -230,18 +238,16 @@ class GirlController extends Controller
         ]);
     }
 
-
     public function dashboard()
-{
-    $girl = auth()->user();
+    {
+        $girl = auth()->user(); 
 
-    // Traer historial de códigos usados para esta chica
-    $history = CodeUsage::where('girl_id', $girl->id)
-                ->orderByDesc('used_at')
-                ->with('code')
-                ->get();
+        // Traer historial de códigos usados para esta chica
+        $history = CodeUsage::where('girl_id', $girl->id)
+                    ->orderByDesc('used_at')
+                    ->with('code')
+                    ->get();
 
-    return view('girl.dashboard', compact('girl', 'history'));
-}
-
+        return view('girl.dashboard', compact('girl', 'history'));
+    }
 }

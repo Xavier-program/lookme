@@ -13,6 +13,7 @@ use App\Http\Controllers\User\BuyCodeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminCodeController;
 
+
 /*
 |--------------------------------------------------------------------------
 | RUTA PRINCIPAL
@@ -51,12 +52,14 @@ Route::post('/girls/{id}/private', [GirlController::class, 'checkCode'])
     ->name('user.girls.private');
 
 Route::get('/girls/{id}/private-content', [GirlController::class, 'privateContent'])
-    ->middleware('girl.access')
+    
     ->name('user.girls.privateContent');
 
 Route::post('/girls/{id}/check-code', [GirlController::class, 'checkCodeAjax']);
 
 Route::get('/girls/{id}/full', [GirlController::class, 'fullProfile'])
+
+
     ->name('user.girls.full');
 
 /*
@@ -154,7 +157,7 @@ Route::get('/chica/{id}', [PublicGirlController::class, 'show'])
     ->name('chica.show');
 
 Route::get('/girls/{id}/full', [PublicGirlController::class, 'showFull'])
-    ->name('girls.full');
+   ->name('girls.full');
 
 /*
 |--------------------------------------------------------------------------
