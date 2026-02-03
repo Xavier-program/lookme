@@ -187,4 +187,10 @@ Route::get('/force-login', function () {
 Route::view('/terms', 'legal.terms')->name('terms');
 Route::view('/privacy', 'legal.privacy')->name('privacy');
 
+
+Route::get('/admin/codes/export/excel', 
+    [AdminCodeController::class, 'exportExcel']
+)->name('admin.codes.export.excel');
+
+
 require __DIR__.'/auth.php';

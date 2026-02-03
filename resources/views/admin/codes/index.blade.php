@@ -11,11 +11,15 @@
                class="bg-gray-700 hover:bg-gray-800 text-white font-bold px-6 py-2 rounded-xl">
                 ← Volver
             </a>
+            <a href="{{ route('admin.codes.export.excel') }}"
+   class="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2 rounded-xl">
+    ⬇ Exportar Excel
+</a>
+
         </div>
 
         <div class="bg-white rounded-2xl shadow p-6">
 
-            <!-- CONTENEDOR RESPONSIVO -->
             <div class="overflow-x-auto">
                 <table class="min-w-full table-auto text-sm">
                     <thead class="bg-gray-100">
@@ -31,11 +35,59 @@
                     <tbody>
 
                         @php
+                            use Carbon\Carbon;
+
+                            $lastWeek = null;
                             $lastGirlId = null;
+
+                            // 👉 aquí guardamos el conteo semanal
+                            $weeklyUsedByGirl = [];
                         @endphp
 
                         @foreach($codes as $code)
 
+                            @php
+                                $currentWeek = $code->created_at->format('o-W');
+                                $weekStart = $code->created_at->copy()->startOfWeek(Carbon::MONDAY);
+                                $weekEnd = $code->created_at->copy()->endOfWeek(Carbon::SUNDAY);
+                            @endphp
+
+                            {{-- NUEVA SEMANA --}}
+                            @if($lastWeek !== null && $lastWeek !== $currentWeek)
+                                {{-- RESUMEN SEMANAL --}}
+                                <tr class="bg-blue-50">
+                                    <td colspan="6" class="px-4 py-3 font-bold">
+                                        📊 Resumen semanal
+                                        <ul class="mt-2 ml-4 list-disc">
+                                            @foreach($weeklyUsedByGirl as $girlName => $count)
+                                                <li>{{ $girlName }}: {{ $count }} códigos usados</li>
+                                            @endforeach
+                                        </ul>
+                                    </td>
+                                </tr>
+
+                                @php
+                                    // reset semanal
+                                    $weeklyUsedByGirl = [];
+                                    $lastGirlId = null;
+                                @endphp
+                            @endif
+
+                            {{-- ENCABEZADO SEMANA --}}
+                            @if($lastWeek !== $currentWeek)
+                                <tr class="bg-black text-white">
+                                    <td colspan="6" class="px-4 py-2 font-bold text-center">
+                                        📅 Semana del {{ $weekStart->format('d/m/Y') }}
+                                        al {{ $weekEnd->format('d/m/Y') }}
+                                    </td>
+                                </tr>
+
+                                @php
+                                    $lastWeek = $currentWeek;
+                                @endphp
+                            @endif
+
+                            {{-- AGRUPACIÓN POR CHICA --}}
                             @if($lastGirlId !== $code->girl_id)
                                 <tr class="bg-gray-200">
                                     <td colspan="6" class="px-4 py-2 font-bold">
@@ -47,22 +99,27 @@
                                 @endphp
                             @endif
 
+                            {{-- CONTADOR SEMANAL (SOLO USADOS) --}}
+                            @if($code->used_at && $code->girl)
+                                @php
+                                    $girlName = $code->girl->name . ' (ID ' . $code->girl->id . ')';
+                                    $weeklyUsedByGirl[$girlName] =
+                                        ($weeklyUsedByGirl[$girlName] ?? 0) + 1;
+                                @endphp
+                            @endif
+
                             <tr class="{{ $loop->even ? 'bg-gray-50' : 'bg-white' }}">
 
-                                <!-- CÓDIGO -->
                                 <td class="border px-4 py-2 font-mono font-bold">
                                     {{ $code->code }}
                                 </td>
 
-                                <!-- ESTADO -->
                                 <td class="border px-4 py-2">
                                     @php
                                         $estado = 'Disponible';
                                         $color = 'text-green-600';
 
                                         if ($code->used_at) {
-
-                                            // Si ya pasó la hora
                                             if (now()->greaterThan($code->used_at->copy()->addHour())) {
                                                 $estado = 'Expirado';
                                                 $color = 'text-gray-600';
@@ -70,10 +127,8 @@
                                                 $estado = 'Usado';
                                                 $color = 'text-red-600';
                                             }
-
                                         }
 
-                                        // Si el código expiró por expires_at del sistema
                                         if ($code->expires_at && $code->expires_at->isPast()) {
                                             $estado = 'Expirado';
                                             $color = 'text-gray-600';
@@ -83,17 +138,14 @@
                                     <span class="{{ $color }} font-bold">{{ $estado }}</span>
                                 </td>
 
-                                <!-- FECHA DE CREACIÓN -->
                                 <td class="border px-4 py-2">
                                     {{ $code->created_at->format('d/m/Y H:i') }}
                                 </td>
 
-                                <!-- FECHA DE USO -->
                                 <td class="border px-4 py-2">
                                     {{ $code->used_at ? $code->used_at->format('d/m/Y H:i') : '-' }}
                                 </td>
 
-                                <!-- USADO EN -->
                                 <td class="border px-4 py-2">
                                     @if($code->girl)
                                         {{ $code->girl->name }} (ID: {{ $code->girl->id }})
@@ -102,18 +154,32 @@
                                     @endif
                                 </td>
 
-                                <!-- VENCIMIENTO -->
                                 <td class="border px-4 py-2">
                                     {{ $code->used_at ? $code->used_at->copy()->addHour()->format('d/m/Y H:i') : '-' }}
                                 </td>
 
                             </tr>
+
                         @endforeach
+
+                        {{-- ÚLTIMO RESUMEN --}}
+                        @if(count($weeklyUsedByGirl))
+                            <tr class="bg-blue-50">
+                                <td colspan="6" class="px-4 py-3 font-bold">
+                                    📊 Resumen semanal
+                                    <ul class="mt-2 ml-4 list-disc">
+                                        @foreach($weeklyUsedByGirl as $girlName => $count)
+                                            <li>{{ $girlName }}: {{ $count }} códigos usados</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
+                            </tr>
+                        @endif
+
                     </tbody>
                 </table>
             </div>
 
-            <!-- PAGINACIÓN -->
             <div class="mt-4">
                 {{ $codes->links() }}
             </div>

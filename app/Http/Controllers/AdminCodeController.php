@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Exports\CodesWeeklyExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 use App\Models\Code;
 use App\Models\CodeBatch;
@@ -48,12 +50,22 @@ class AdminCodeController extends Controller
     }
 
     public function index()
-    {
-        $codes = Code::with('girl')
-            ->orderBy('girl_id', 'asc')     // <-- AGRUPA POR CHICA
-            ->orderBy('created_at', 'desc')
-            ->paginate(50);
+{
+    $codes = Code::with('girl')
+        ->orderBy('created_at', 'desc') // 1️⃣ FLUJO NORMAL POR FECHA
+        ->orderBy('girl_id', 'asc')     // 2️⃣ SOLO PARA ORDEN VISUAL
+        ->paginate(50);
 
-        return view('admin.codes.index', compact('codes'));
-    }
+    return view('admin.codes.index', compact('codes'));
+}
+
+
+public function exportExcel()
+{
+    return Excel::download(
+        new CodesWeeklyExport,
+        'codigos_semanales.xlsx'
+    );
+}
+
 }
