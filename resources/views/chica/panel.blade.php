@@ -127,11 +127,74 @@
         {{ auth()->user()->contacto ?? 'No hay contacto definido' }}
     </p>
 
+
+
+<!-- MODAL INFO HISTORIAL -->
+<div id="historyInfoModal"
+     class="fixed inset-0 bg-black/70 hidden z-50 flex items-center justify-center px-4">
+
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 relative">
+
+        <h2 class="text-xl font-bold mb-3 text-center">
+            📊 Información sobre pagos
+        </h2>
+
+        <div class="text-sm text-gray-700 space-y-2">
+            <p>
+                Los ingresos generados por el uso de tus códigos se liquidan de forma
+                <strong>semanal</strong>.
+            </p>
+
+            <p>
+                📅 Los pagos se realizan los días <strong>lunes y martes</strong>,
+                correspondientes a los códigos utilizados durante la
+                <strong>semana anterior</strong>.
+            </p>
+
+            <p>
+                💵 <strong>Monto por código:</strong> $50 MXN por cada código utilizado.
+            </p>
+
+            <p>
+                ⏰ <strong>Horario de pago:</strong> de 9:00 a.m. a 3:00 p.m.
+            </p>
+
+            <hr class="my-2">
+
+            <p>
+                📩 Para dudas o aclaraciones puedes escribir a:
+                <br>
+                <strong>lookmeatcompany@gmail.com</strong>
+            </p>
+
+            <p class="text-gray-600">
+                Las solicitudes se revisan durante los días de pago
+                y podrán resolverse en el siguiente periodo semanal.
+            </p>
+        </div>
+
+        <div class="mt-6 flex gap-3">
+            <button onclick="closeHistoryInfoModal()"
+                class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-xl font-bold">
+                Cancelar
+            </button>
+
+            <a href="{{ route('chica.history.codes') }}"
+               class="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl font-bold">
+                Continuar
+            </a>
+        </div>
+    </div>
+</div>
+
+
+
+
     <!-- BOTÓN VER HISTORIAL -->
-    <a href="{{ route('chica.history.codes') }}"
-       class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold">
-       Ver historial de códigos
-    </a>
+    <button onclick="openHistoryInfoModal()"
+    class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold">
+    Ver historial de códigos
+</button>
 </div>
 
                     </div>
@@ -147,4 +210,15 @@
             </div>
         </div>
     </div>
+
+
+    <script>
+    function openHistoryInfoModal() {
+        document.getElementById('historyInfoModal').classList.remove('hidden');
+    }
+
+    function closeHistoryInfoModal() {
+        document.getElementById('historyInfoModal').classList.add('hidden');
+    }
+</script>
 @endsection

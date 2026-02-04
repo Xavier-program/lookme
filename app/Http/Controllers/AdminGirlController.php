@@ -51,7 +51,7 @@ class AdminGirlController extends Controller
     // BORRAR USUARIO
     $girl->delete();
 
-    return redirect()->route('girls.index')
+    return redirect()->route('admin.girls.index')
         ->with('success', 'Chica eliminada correctamente.');
 }
 

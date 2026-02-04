@@ -61,7 +61,7 @@
 
 <!-- MODAL COMPRAR CÓDIGOS -->
 <div id="buyModal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center px-4">
-    <div class="bg-gray-900 rounded-2xl shadow-xl max-w-md w-full p-6 relative border border-gray-800">
+    <div class="bg-gray-900 rounded-2xl shadow-xl max-w-md w-full p-6 relative border border-gray-800 text-white">
         <button onclick="closeBuyModal()"
             class="absolute top-3 right-3 text-gray-400 hover:text-white text-xl">
             ✕
@@ -73,7 +73,7 @@
 
         <p class="text-gray-300 text-sm mb-4 text-center">
             Un código desbloquea el contenido privado de <strong>una sola chica</strong>
-            durante <strong>1 hora</strong>.
+            durante <strong>30 min.</strong>.
         </p>
 
         <div class="space-y-3 mb-6">
@@ -96,19 +96,28 @@
         </div>
 
         <div class="bg-gray-800 rounded-lg p-4 text-sm mb-4 border border-gray-800">
-            <p class="mb-2">
-                📲 Para comprar, envía un WhatsApp a:
-            </p>
-            <p class="font-bold text-center text-lg">
-                +52 55 1234 5678
-            </p>
-            <p class="mt-2 text-gray-400 text-center">
-                Indica cuántos códigos deseas y el paquete.
-            </p>
+          <p class="mb-2">
+    📲 Compra tus códigos a través de nuestro WhatsApp oficial:
+</p>
+
+<p class="font-bold text-center text-lg">
+    +52 961 815 4488
+</p>
+
+<p class="mt-2 text-gray-400 text-center">
+    Atención automática • Indica el paquete de códigos que deseas.
+</p>
+
+
+<a href="https://wa.me/529618154488?text=Hola%20quiero%20comprar%20codigos%20de%20acceso%20LookMe"
+   target="_blank"
+   class="mt-4 block w-full text-center bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition">
+   💬 Contactar por WhatsApp
+</a>
         </div>
 
         <p class="text-xs text-gray-500 text-center">
-            * Los códigos son de uso único y expiran después de 1 hora.
+            * Los códigos son de uso único y expiran después de 30 min..
         </p>
     </div>
 </div>

@@ -8,6 +8,11 @@
             <h1 class="text-2xl font-bold mb-6">
                 📊 Historial semanal de códigos usados
             </h1>
+           
+
+
+
+
 
             @php
                 use Carbon\Carbon;
