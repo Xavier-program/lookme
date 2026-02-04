@@ -11,13 +11,23 @@ class CheckGirlAccess
     {
         $girlId = $request->route('id');
 
-        $expiresAt = session()->get("access_girl_{$girlId}");
+        // acceso guardado en sesión
+        $access = session("girl_access.$girlId");
 
-        // ❌ No hay acceso o expiró
-        if (!$expiresAt || now()->greaterThan($expiresAt)) {
+        // ❌ No existe acceso
+        if (!$access) {
             return redirect()
-                ->route('user.girls.private', $girlId)
-                ->with('error', 'Tu acceso ha expirado. Ingresa un nuevo código.');
+                ->route('user.girls.index')
+                ->with('error', 'Acceso no autorizado');
+        }
+
+        // ❌ Expirado
+        if (now()->greaterThan($access['expires_at'])) {
+            session()->forget("girl_access.$girlId");
+
+            return redirect()
+                ->route('user.girls.index')
+                ->with('error', 'Tu acceso ha expirado');
         }
 
         return $next($request);

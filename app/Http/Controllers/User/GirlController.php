@@ -87,8 +87,24 @@ class GirlController extends Controller
             'used_at'    => now(),
         ]);
 
-        return redirect()->route('user.girls.privateContent', $girl->id);
+        // 🔐 Generar token único temporal
+$token = bin2hex(random_bytes(16)); // 32 caracteres, imposible de adivinar
+
+// Guardar token en sesión (NO afecta tu lógica actual)
+session()->put("girl_token_{$token}", [
+    'girl_id' => $girl->id,
+    'expires_at' => now()->addMinutes(30),
+]);
+
+// Redirigir usando token (NO usando ID)
+return redirect()->route('girls.token', ['token' => $token]);
+
     }
+
+
+
+
+
 
     // 3) Mostrar contenido privado (Paso 7)
     public function privateContent($id)
@@ -159,17 +175,12 @@ class GirlController extends Controller
         return view('user.girls.index', compact('girls', 'accessTimes', 'hasAccess'));
     }
 
-    public function fullProfile($id)
+   public function fullProfile($id)
 {
-    // ❌ si NO tiene acceso, regresarlo al listado
-    if (!session()->has("access_girl_{$id}")) {
-        return redirect()->route('user.girls.index');
-    }
-
     $girl = User::findOrFail($id);
-
     return view('user.girls.full', compact('girl'));
 }
+
 
     public function checkCodeAjax(Request $request, $id)
     {
@@ -234,6 +245,7 @@ class GirlController extends Controller
 
         return response()->json([
             'success' => true,
+            
             'debug' => 'CÓDIGO VALIDO Y ASIGNADO'
         ]);
     }
@@ -250,4 +262,42 @@ class GirlController extends Controller
 
         return view('girl.dashboard', compact('girl', 'history'));
     }
+
+
+
+
+
+
+
+    public function accessByToken($token)
+{
+    // Revisar token en sesión
+    $data = session()->get("girl_token_{$token}");
+
+    if (!$data) {
+        return redirect()->route('user.girls.index')
+            ->with('error', 'Acceso no autorizado o expirado.');
+    }
+
+    // Revisar expiración
+    if (now()->greaterThan($data['expires_at'])) {
+        session()->forget("girl_token_{$token}");
+        return redirect()->route('user.girls.index')
+            ->with('error', 'El acceso ha expirado.');
+    }
+
+    // Obtener la chica
+    $girl = User::find($data['girl_id']);
+    if (!$girl) {
+        return redirect()->route('user.girls.index')
+            ->with('error', 'Chica no encontrada.');
+    }
+
+    // ✅ Sincronizar sesión de acceso si quieres mantener timers
+    session()->put("access_girl_{$girl->id}", $data['expires_at']);
+
+    // Mostrar vista completa
+    return view('user.girls.full', compact('girl'));
+}
+
 }
