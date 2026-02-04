@@ -31,7 +31,7 @@
                         <textarea
                             name="name_artist"
                             rows="3"
-                            placeholder="Ejemplo:  Chetumal · Soy Luna, una chica auténtica y encantadora.  Ven y conóceme, te garantizo una experiencia que no olvidarás."
+                            placeholder="Ejemplo:  Hola soy de _________, me llamo __________, una chica auténtica y encantadora.  Ven y conóceme, te garantizo una experiencia que no olvidarás."
                             class="w-full border rounded-lg p-3 resize-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                         >{{ $user->name_artist }}</textarea>
                     </div>
