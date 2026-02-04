@@ -35,9 +35,22 @@
 
                         <div class="flex-1">
                             <p class="text-gray-700">
-                                <span class="font-semibold">Nombre público:</span>
+                                <span class="font-semibold">Ciudad</span>
                                 {{ auth()->user()->name_artist ?? 'Aún no definido' }}
                             </p>
+
+
+                            @if(auth()->user()->description_public)
+    <p class="text-gray-600 mt-2 whitespace-pre-line break-words">
+        {{ auth()->user()->description_public }}
+    </p>
+@else
+    <p class="text-gray-400 mt-2 italic">
+        Sin descripción pública
+    </p>
+@endif
+
+
                             <p class="text-gray-500 mt-1">
                                 Esto será lo que verán los visitantes antes de pagar.
                             </p>
@@ -102,21 +115,24 @@
                             @endif
                         </div>
 
-                        <!-- DESCRIPCION + HISTORIAL -->
-                        <div class="bg-gray-50 p-4 rounded-xl">
-                            <h4 class="font-bold mb-2">Descripción privada</h4>
-                            <p class="text-gray-600 mb-4 whitespace-pre-line break-words">
-                                {{ auth()->user()->description_private ?? 'No hay descripción privada aún' }}
-                            </p>
+                        <!-- DESCRIPCION + CONTACTO + HISTORIAL -->
+<div class="bg-gray-50 p-4 rounded-xl">
+    <h4 class="font-bold mb-2">Descripción privada</h4>
+    <p class="text-gray-600 mb-4 whitespace-pre-line break-words">
+        {{ auth()->user()->description_private ?? 'No hay descripción privada aún' }}
+    </p>
 
-                            <!-- BOTÓN VER HISTORIAL -->
+    <h4 class="font-bold mb-2">Contacto privado</h4>
+    <p class="text-gray-600 mb-4 break-words">
+        {{ auth()->user()->contacto ?? 'No hay contacto definido' }}
+    </p>
+
+    <!-- BOTÓN VER HISTORIAL -->
     <a href="{{ route('chica.history.codes') }}"
-   class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold">
-   Ver historial de códigos
-</a>
-
-
-                        </div>
+       class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold">
+       Ver historial de códigos
+    </a>
+</div>
 
                     </div>
 

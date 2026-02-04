@@ -60,37 +60,45 @@ class GirlPanelController extends Controller
     }
 
     public function updatePrivate(Request $request)
-    {
-        $request->validate([
-            'description_private' => 'nullable|string|max:1000',
-            'photo_private_1' => 'nullable|image|max:1024',
-            'photo_private_2' => 'nullable|image|max:1024',
-            'photo_private_3' => 'nullable|image|max:1024',
-            'photo_private_4' => 'nullable|image|max:1024',
-            'photo_private_5' => 'nullable|image|max:1024',
-            'photo_private_6' => 'nullable|image|max:1024',
-            'video_private' => 'nullable|mimes:mp4|max:10240',
-        ]);
+{
+    $request->validate([
+        'description_private' => 'nullable|string|max:1000',
+        'contacto' => 'nullable|string|max:255',
+        'photo_private_1' => 'nullable|image|max:1024',
+        'photo_private_2' => 'nullable|image|max:1024',
+        'photo_private_3' => 'nullable|image|max:1024',
+        'photo_private_4' => 'nullable|image|max:1024',
+        'photo_private_5' => 'nullable|image|max:1024',
+        'photo_private_6' => 'nullable|image|max:1024',
+        'video_private' => 'nullable|mimes:mp4|max:10240',
+    ]);
 
-        $user = auth()->user();
+    $user = auth()->user();
 
-        for ($i = 1; $i <= 6; $i++) {
-            if ($request->hasFile("photo_private_$i")) {
-                $user->{"photo_private_$i"} = $request->file("photo_private_$i")
-                    ->store('photos_private', 'public');
-            }
+    for ($i = 1; $i <= 6; $i++) {
+        if ($request->hasFile("photo_private_$i")) {
+            $user->{"photo_private_$i"} =
+                $request->file("photo_private_$i")
+                ->store('photos_private', 'public');
         }
-
-        if ($request->hasFile('video_private')) {
-            $user->video_private = $request->file('video_private')
-                ->store('videos_private', 'public');
-        }
-
-        $user->description_private = $request->description_private;
-        $user->save();
-
-        return redirect()->route('girl.dashboard')->with('success', 'Perfil privado actualizado');
     }
+
+    if ($request->hasFile('video_private')) {
+        $user->video_private =
+            $request->file('video_private')
+            ->store('videos_private', 'public');
+    }
+
+    // 🔥 AQUÍ ESTABA EL PROBLEMA
+    $user->description_private = $request->description_private;
+    $user->contacto = $request->contacto;
+
+    $user->save();
+
+    return redirect()
+        ->route('girl.dashboard')
+        ->with('success', 'Perfil privado actualizado');
+}
 
     // ELIMINAR FOTO PÚBLICA
     public function deletePhotoPublic()

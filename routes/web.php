@@ -58,7 +58,6 @@ Route::get('/girls/{id}/private-content', [GirlController::class, 'privateConten
 Route::post('/girls/{id}/check-code', [GirlController::class, 'checkCodeAjax']);
 
 Route::get('/girls/{id}/full', [GirlController::class, 'fullProfile'])
-->middleware('girl.access')
     ->name('user.girls.full');
 
 /*
@@ -155,9 +154,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/chica/{id}', [PublicGirlController::class, 'show'])
     ->name('chica.show');
 
-Route::get('/girls/{id}/full', [PublicGirlController::class, 'showFull'])
-
-   ->name('girls.full');
+//Route::get('/girls/{id}/full', [PublicGirlController::class, 'showFull'])
+  // ->name('girls.full');
 
 /*
 |--------------------------------------------------------------------------
@@ -195,9 +193,8 @@ Route::get('/admin/codes/export/excel',
     [AdminCodeController::class, 'exportExcel']
 )->name('admin.codes.export.excel');
 
-
-
-
+//Route::post('/girls/{id}/check-code', [GirlController::class, 'checkCode'])
+  //  ->name('user.girls.checkCode');
 
 
 

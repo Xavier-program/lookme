@@ -24,18 +24,61 @@
 
                     <div>
                         <label class="block font-bold">Descripción privada</label>
+
+                         <p class="text-sm text-gray-600 mb-2">
+        Esta descripción es parte de tu <strong>contenido privado</strong> 🔒  
+        Aquí puedes expresarte con más libertad, describir tu personalidad,
+        tu estilo y lo que ofreces a quienes compran tu código.
+        <br><br>
+        <strong>Ejemplo:</strong><br>
+        Soy una chica cariñosa, discreta y muy atenta.  
+        Me gusta crear un ambiente cómodo, divertido y sin prisas.
+        Siempre busco que la experiencia sea especial y placentera.
+    </p>
                        <textarea name="description_private"
           class="w-full border rounded-lg p-2 min-h-[220px]"
           rows="6"
-          placeholder="Escribe aquí una descripción atractiva de ti y tu servicio. Incluye tu forma de contacto (WhatsApp, Telegram o Instagram). Ejemplo:
+          placeholder="Escribe aquí una descripción atractiva de ti y tu servicio.">{{ $user->description_private }}</textarea>
 
-Soy una chica complaciente, cariñosa y discreta. Me gusta disfrutar y hacer que tú también lo hagas. 
+<div>
+    <label class="block font-bold">Contacto privado</label>
 
-📲 Contacto: WhatsApp / Telegram: +52 123 456 7890
-📍 Zona: (tu ciudad)
-⌚ Horarios: (tu disponibilidad)
 
-¡Escríbeme y nos organizamos!">{{ $user->description_private }}</textarea>
+    <p class="text-sm text-gray-600 mb-2">
+        Aquí indica cómo deseas que te contacten una vez que el usuario
+        tenga acceso a tu contenido privado.  
+        <strong>Esta información no es pública.</strong>
+        <br><br>
+        <strong>Ejemplo:</strong><br>
+        WhatsApp: +52 998 123 4567<br>
+        Telegram: @TuUsuario
+    </p>
+    <input type="text" 
+           name="contacto" 
+           class="w-full border rounded-lg p-2" 
+           placeholder="Tu WhatsApp, Telegram o Instagram"
+           value="{{ $user->contacto ?? '' }}">
+</div>
+
+
+
+
+
+
+
+<div class="mb-6 bg-gray-50 border border-gray-200 rounded-xl p-4">
+    <h4 class="font-bold text-lg mb-2">📸🎥 Contenido privado</h4>
+
+     <p class="text-sm text-gray-600 leading-relaxed">
+        Este contenido es exclusivo y solo será visible para usuarios con código.  
+        <br><br>
+        Te recomendamos subir fotos <strong>claras, atractivas y sugerentes</strong>,
+        cuidando la iluminación y el encuadre para mostrar tu mejor versión.
+        <br><br>
+        Un video privado transmite cercanía y confianza,
+        lo que aumenta considerablemente las probabilidades de contacto.
+    </p>
+</div>
 
 
                     </div>

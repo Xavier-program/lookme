@@ -18,122 +18,69 @@ class GirlController extends Controller
     }
 
     // 2) Validar código (checkCode)
-    public function checkCode(Request $request, $id)
-    {
-        $request->validate([
-            'code' => 'required|string'
-        ]);
+  public function checkCode(Request $request, $id)
+{
+    $request->validate([
+        'code' => 'required|string',
+    ]);
 
-        $girl = User::findOrFail($id);
+    $girl = User::findOrFail($id);
 
-        $code = Code::where('code', $request->code)
-                ->where(function ($query) use ($girl) {
-                    $query->whereNull('girl_id')
-                          ->orWhere('girl_id', $girl->id);
-                })
-                ->first();
+    $code = Code::where('girl_id', $girl->id)
+        ->where('code', $request->code)
+        ->where('expires_at', '>', now())
+        ->first();
 
-        // ❌ No existe
-        if (!$code) {
-            return back()->with('error', 'Código inválido.');
-        }
-
-        // ⛔ Código caducado (del sistema, NO la hora)
-        if ($code->expires_at && $code->expires_at->isPast()) {
-            return back()->with('error', 'El código ha expirado.');
-        }
-
-        /**
-         * 🔒 SI YA FUE USADO
-         */
-        if ($code->used_at) {
-
-            // ❌ Si pertenece a otra chica
-            if ($code->girl_id != $girl->id) {
-                return back()->with('error', 'Este código no pertenece a esta chica.');
-            }
-
-            // ⛔ Si ya pasó la hora
-            if (now()->greaterThan($code->used_at->copy()->addMinutes(30))) {
-                return back()->with('error', 'El acceso con este código ya expiró.');
-            }
-
-        } else {
-            /**
-             * ✅ PRIMER USO DEL CÓDIGO
-             */
-            $expiresAt = now()->addMinutes(30); // unificar expiración
-            $code->update([
-                'girl_id'    => $girl->id,
-                'used_at'    => now(),
-                'expires_at' => $expiresAt,
-                'ip'         => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
-
-            // 🔁 REFRESCAR EL MODELO PARA QUE SE ACTUALICE EN MEMORIA
-            $code->refresh();
-
-            // 🕐 Guardar acceso en sesión con el mismo tiempo que la DB
-            session()->put("access_girl_{$girl->id}", $expiresAt);
-        }
-
-        // 🔥 AQUI SE GUARDA EL HISTORIAL (SE AGREGO ESTA PARTE)
-        CodeUsage::create([
-            'code_id'    => $code->id,
-            'girl_id'    => $girl->id,
-            'ip'         => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'used_at'    => now(),
-        ]);
-
-        // 🔐 Generar token único temporal
-$token = bin2hex(random_bytes(16)); // 32 caracteres, imposible de adivinar
-
-// Guardar token en sesión (NO afecta tu lógica actual)
-session()->put("girl_token_{$token}", [
-    'girl_id' => $girl->id,
-    'expires_at' => now()->addMinutes(30),
-]);
-
-// Redirigir usando token (NO usando ID)
-return redirect()->route('girls.token', ['token' => $token]);
-
+    if (!$code) {
+        return redirect()->back()->with('error', 'Código inválido o expirado.');
     }
 
+    // Registrar IP y user-agent
+    $code->ip = request()->ip();
+    $code->user_agent = request()->userAgent();
+    $code->used_at = now();
+    $code->save();
 
+    // Crear sesión temporal
+    session()->put("access_girl_{$girl->id}", $code->expires_at);
 
+    return redirect()->route('user.girls.full', $girl->id);
+}
 
 
 
     // 3) Mostrar contenido privado (Paso 7)
-    public function privateContent($id)
+   public function privateContent($id)
 {
     $girl = User::findOrFail($id);
 
-    // 1️⃣ Revisar acceso en sesión
-    $expiresAt = session()->get("access_girl_{$girl->id}");
-
-    // 2️⃣ Validar también contra la DB
+    // Buscar un código activo en DB para esta chica
     $code = Code::where('girl_id', $girl->id)
         ->whereNotNull('used_at')
         ->where('expires_at', '>', now())
         ->orderByDesc('expires_at')
         ->first();
 
-    if (!$expiresAt || !$code || now()->greaterThan($expiresAt) || now()->greaterThan($code->expires_at)) {
-        // Limpiar sesión si ya expiró
+    // Si no hay código válido, eliminar sesión y redirigir al formulario
+    if (!$code) {
         session()->forget("access_girl_{$girl->id}");
-
         return redirect()->route('user.girls.private', $girl->id)
             ->with('error', 'Tu acceso expiró. Compra otro código.');
     }
 
-    // Sincronizar sesión con expiración real de la DB
+    // OPCIONAL: validar IP / user-agent para que la URL no funcione en otro dispositivo
+    if ($code->ip !== request()->ip() || $code->user_agent !== request()->userAgent()) {
+        session()->forget("access_girl_{$girl->id}");
+        return redirect()->route('user.girls.private', $girl->id)
+            ->with('error', 'Este código solo puede usarse desde el dispositivo original.');
+    }
+
+    // Sincronizar sesión con expiración real de la DB (para el contador JS)
     session()->put("access_girl_{$girl->id}", $code->expires_at);
 
     return view('user.girls.privateContent', compact('girl'));
 }
+
 
 
     public function index()
@@ -175,11 +122,46 @@ return redirect()->route('girls.token', ['token' => $token]);
         return view('user.girls.index', compact('girls', 'accessTimes', 'hasAccess'));
     }
 
-   public function fullProfile($id)
+      // ✅ Full profile ajustado: ahora bloquea sin código activo
+ public function fullProfile($id)
 {
     $girl = User::findOrFail($id);
+    $sessionKey = "access_girl_{$girl->id}";
+
+    // 1) Revisar sesión activa
+    $expiresAtSession = session()->get($sessionKey);
+    if ($expiresAtSession && now()->lessThan($expiresAtSession)) {
+        return view('user.girls.full', compact('girl'));
+    }
+
+    // 2) Revisar si hay un código válido en la DB
+    $code = Code::where('girl_id', $girl->id)
+        ->whereNotNull('used_at')
+        ->where('expires_at', '>', now())
+        ->orderByDesc('expires_at')
+        ->first();
+
+    if (!$code) {
+        // Redirigir a lista de chicas si no hay código válido
+        return redirect()->route('user.girls.index')
+            ->with('error', 'Debes ingresar un código válido para ver el perfil completo.');
+    }
+
+    // 3) Validar que el código se use desde el mismo dispositivo
+    if ($code->ip !== request()->ip() || $code->user_agent !== request()->userAgent()) {
+        return redirect()->route('user.girls.index')
+            ->with('error', 'Este código solo puede usarse desde el dispositivo original.');
+    }
+
+    // 4) Si todo es válido, crear sesión temporal
+    session()->put($sessionKey, $code->expires_at);
+
+    // 5) Mostrar contenido privado
     return view('user.girls.full', compact('girl'));
 }
+
+
+
 
 
     public function checkCodeAjax(Request $request, $id)
@@ -245,7 +227,6 @@ return redirect()->route('girls.token', ['token' => $token]);
 
         return response()->json([
             'success' => true,
-            
             'debug' => 'CÓDIGO VALIDO Y ASIGNADO'
         ]);
     }
@@ -262,42 +243,4 @@ return redirect()->route('girls.token', ['token' => $token]);
 
         return view('girl.dashboard', compact('girl', 'history'));
     }
-
-
-
-
-
-
-
-    public function accessByToken($token)
-{
-    // Revisar token en sesión
-    $data = session()->get("girl_token_{$token}");
-
-    if (!$data) {
-        return redirect()->route('user.girls.index')
-            ->with('error', 'Acceso no autorizado o expirado.');
-    }
-
-    // Revisar expiración
-    if (now()->greaterThan($data['expires_at'])) {
-        session()->forget("girl_token_{$token}");
-        return redirect()->route('user.girls.index')
-            ->with('error', 'El acceso ha expirado.');
-    }
-
-    // Obtener la chica
-    $girl = User::find($data['girl_id']);
-    if (!$girl) {
-        return redirect()->route('user.girls.index')
-            ->with('error', 'Chica no encontrada.');
-    }
-
-    // ✅ Sincronizar sesión de acceso si quieres mantener timers
-    session()->put("access_girl_{$girl->id}", $data['expires_at']);
-
-    // Mostrar vista completa
-    return view('user.girls.full', compact('girl'));
-}
-
 }

@@ -15,27 +15,41 @@
                 <div class="bg-white shadow-sm rounded-lg p-6 space-y-4">
 
                    <div>
-                        <label class="block font-bold mb-1">Nombre artístico / Ciudad</label>
+                        
 
-<p class="text-sm text-gray-600 mb-2">
+<p class="text-sm text-gray-600 mb-1">
      <strong>Pasos importantes para completar tu perfil:</strong><br><br>
 
-    1. <strong>Ciudad donde te encuentras:</strong> Indica tu ciudad o zona de trabajo para que los usuarios puedan ubicarte fácilmente.<br>
-    2. <strong>Nombre artístico:</strong> Ingresa el nombre con el que deseas presentarte en la plataforma; este será visible para los usuarios.<br>
-    3. <strong>Breve descripción:</strong> Escribe una descripción clara y profesional que destaque tu estilo y atraiga a los usuarios a tu perfil.<br><br>
-
-    Completar correctamente esta información es fundamental para mejorar tu visibilidad, generar mayor confianza y facilitar el contacto con los usuarios.
+    Es muy importante que indiques tu <strong>ciudad o zona</strong>, ya que esto ayuda a que los usuarios te encuentren más rápido  
+    y sepan si estás cerca de ellos para poder contactarte con mayor facilidad 📍
 </p>
 
 
                         <textarea
                             name="name_artist"
                             rows="3"
-                            placeholder="Ejemplo:  Hola soy de _________, me llamo __________, una chica auténtica y encantadora.  Ven y conóceme, te garantizo una experiencia que no olvidarás."
+                            placeholder="Ingresa aqui la ciudad donde te encuentras"
                             class="w-full border rounded-lg p-3 resize-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                         >{{ $user->name_artist }}</textarea>
                     </div>
 
+                    <div class="mt-4">
+    <label class="block font-bold">Descripción pública</label>
+    <p class="text-sm text-gray-600 mb-2">
+    Usa este espacio para presentarte y despertar interés 💖  
+    Una buena descripción hace que más personas quieran ver tu contenido privado.
+    <br><br>
+    <strong>Ejemplo:</strong><br>
+    “Soy una chica carismática, discreta y muy divertida.  
+    Me encanta consentir y crear experiencias únicas 😉”
+</p>
+    <textarea
+        name="description_public"
+        class="w-full border rounded-lg p-2 min-h-[140px]"
+        rows="4"
+        placeholder="Esta descripción será visible para todos los visitantes (antes de pagar)."
+    >{{ $user->description_public }}</textarea>
+</div>
 
 
                     <div>
